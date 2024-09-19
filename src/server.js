@@ -2,54 +2,40 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
 import { env } from './utils/env.js';
-import * as contactServices from './services/contacts.js';
+import eventsRouter from './routers/events.js';
+
 export const setupServer = () => {
   const app = express();
+
+  // Logger setup
   const logger = pino({
     transport: {
       target: 'pino-pretty',
     },
   });
+
+  // Middleware setup
   app.use(logger);
-  app.use(cors());
-  app.use(express.json());
+  app.use(cors()); // Enables Cross-Origin Resource Sharing
+  app.use(express.json()); // Parse incoming JSON requests
 
-  app.get('/contacts', async (req, res) => {
-    const data = await contactServices.getAllContacts();
-    res.json({
-      status: 200,
-      message: 'Successfully found contacts!',
-      data,
-    });
-  });
+  app.use('/events', eventsRouter);
 
-  app.get('/contacts/:id', async (req, res) => {
-    console.log(req.params);
-    const { id } = req.params;
-    const data = await contactServices.getContactById(id);
-    if (!data) {
-      return res.status(404).json({
-        message: 'Contact not found',
-      });
-    }
-    res.json({
-      status: 200,
-      message: `Successfully found contact with id ${id}!`,
-      data,
-    });
-  });
-
+  // 404 handler for unknown routes
   app.use((req, res) => {
     res.status(404).json({
       message: `${req.url} not found`,
     });
   });
 
+  // Global error handler
   app.use((error, req, res, next) => {
+    console.error('Error:', error.message); // Log the error for debugging
     res.status(500).json({
-      message: error.message,
+      message: 'Something went wrong',
     });
   });
+
   const port = Number(env('PORT', 3000));
   app.listen(port, () => console.log(`Server is running on port ${port}`));
 };
