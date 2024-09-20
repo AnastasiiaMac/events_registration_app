@@ -1,15 +1,28 @@
 import { Event } from '../db/models/Event.js';
 
 export const getAllEvents = async (req, res, next) => {
-  const { page = 1, perPage = 10 } = req.query;
+  const {
+    page = 1,
+    perPage = 10,
+    sortBy = 'title',
+    sortOrder = 'asc',
+  } = req.query;
 
   try {
     const parsedPage = parseInt(page, 10) || 1;
     const parsedPerPage = parseInt(perPage, 10) || 10;
+    const sortDirection = sortOrder === 'asc' ? 1 : -1;
+
+    const validSortFields = ['title', 'eventDate', 'organizer'];
+    if (!validSortFields.includes(sortBy)) {
+      return res.status(400).json({ message: 'Invalid sort field' });
+    }
 
     const events = await Event.find()
+      .sort({ [sortBy]: sortDirection })
       .skip((parsedPage - 1) * parsedPerPage)
       .limit(parsedPerPage);
+
     const totalEvents = await Event.countDocuments();
 
     res.status(200).json({

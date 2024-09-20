@@ -30,7 +30,7 @@ export const setupServer = () => {
 
   // Global error handler
   app.use((error, req, res, next) => {
-    console.error('Error:', error.message); // Log the error for debugging
+    console.error('Error:', error.message);
     res.status(500).json({
       message: 'Something went wrong',
     });

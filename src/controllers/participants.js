@@ -2,7 +2,7 @@ import { Participant } from '../db/models/Participant.js';
 import { Event } from '../db/models/Event.js';
 
 export const registerParticipant = async (req, res, next) => {
-  const { id } = req.params; // `id` is the event ID from the URL
+  const { id } = req.params;
   const { fullName, email, dateOfBirth, referral } = req.body;
 
   try {
@@ -35,7 +35,7 @@ export const registerParticipant = async (req, res, next) => {
     await newParticipant.save();
     res.status(201).json({ message: 'Successfully registered for the event!' });
   } catch (error) {
-    next(error); // Handle any errors that occur
+    next(error);
   }
 };
 
@@ -59,6 +59,6 @@ export const getParticipantsByEvent = async (req, res, next) => {
       data: participants,
     });
   } catch (error) {
-    next(error); // Handle any errors
+    next(error);
   }
 };
