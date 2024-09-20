@@ -48,9 +48,11 @@ export const getParticipantsByEvent = async (req, res, next) => {
     const participants = await Participant.find({ eventId: id });
 
     if (participants.length === 0) {
-      return res
-        .status(404)
-        .json({ message: 'No participants found for this event.' });
+      return (
+        res
+          // .status(404)
+          .json({ message: 'No participants found for this event.' })
+      );
     }
 
     res.status(200).json({
