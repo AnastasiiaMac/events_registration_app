@@ -1,14 +1,18 @@
 import { Participant } from '../db/models/Participant.js';
+import { Event } from '../db/models/Event.js';
+
 export const registerParticipant = async (req, res, next) => {
-  const { id } = req.params;
-  const { fullName, email } = req.body;
+  const { id } = req.params; // `id` is the event ID from the URL
+  const { fullName, email, dateOfBirth, referral } = req.body;
 
   try {
+    // Check if the event exists
     const event = await Event.findById(id);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
+    // Check if the participant is already registered for this event
     const existingParticipant = await Participant.findOne({
       email,
       eventId: id,
@@ -19,23 +23,28 @@ export const registerParticipant = async (req, res, next) => {
         .json({ message: 'Participant already registered for this event.' });
     }
 
+    // Create and save the new participant
     const newParticipant = new Participant({
       fullName,
       email,
-      eventId: id,
+      dateOfBirth,
+      referral,
+      eventId: id, // Associate the participant with the event
     });
 
     await newParticipant.save();
     res.status(201).json({ message: 'Successfully registered for the event!' });
   } catch (error) {
-    next(error);
+    next(error); // Handle any errors that occur
   }
 };
 
+// Get all participants for a specific event
 export const getParticipantsByEvent = async (req, res, next) => {
   const { id } = req.params;
 
   try {
+    // Find participants associated with the given event
     const participants = await Participant.find({ eventId: id });
 
     if (participants.length === 0) {
@@ -48,6 +57,6 @@ export const getParticipantsByEvent = async (req, res, next) => {
       data: participants,
     });
   } catch (error) {
-    next(error);
+    next(error); // Handle any errors
   }
 };
